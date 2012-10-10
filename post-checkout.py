@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 *-*
 
 # A post-checkout hook for Dolibarr that automatically
 # switches databases when checking out branches
