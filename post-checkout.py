@@ -18,18 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# How to use:
-# Place this script in the .git/hooks directory
-# Make a symbolic link to post-checkout
-# (ln -s post-checkout.py post-checkout)
-# Default is branch_name = database_name
-# If you want to declare relations manually:
-# define branch name / database name relations
-# in a post-checkout.ini file using statements like
-# branch_name = database_name
-# under a [databases] section
-# Checkout a branch and enjoy ^_^
-
 import sys
 import os
 import subprocess
