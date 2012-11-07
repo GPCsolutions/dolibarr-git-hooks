@@ -30,7 +30,6 @@
 # under a [databases] section
 # Checkout a branch and enjoy ^_^
 
-
 import sys
 import os
 import subprocess
@@ -54,15 +53,16 @@ if sys.argv[3] == '1':
 
     # Strip newline and convert to string
     fqbn = fqbn.rstrip().decode('utf-8')
-    print(fqbn)
 
     # Default is database name = branch name
     newdb = fqbn
 
     # Is there a configuration file ?
-    if os.path.exists('post-checkout.ini'):
+    configpath = os.path.dirname(os.path.realpath(__file__))
+    configfile = os.path.join(configpath, 'post-checkout.ini')
+    if os.path.exists(configfile):
         config = configparser.ConfigParser()
-        config.read('post-checkout.ini')
+        config.read(configfile)
 
         # Search corresponding database name
         if config.has_option('databases', fqbn):
