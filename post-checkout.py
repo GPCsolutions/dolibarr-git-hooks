@@ -22,17 +22,14 @@
 # Place this script in the .git/hooks directory
 # Make a symbolic link to post-checkout
 # (ln -s post-checkout.py post-checkout)
-# Define branch name / database name relation
-# in the USER MODIFIABLE PART using statements like
-# 'branch name': 'database name',
+# Default is branch_name = database_name
+# If you want to declare relations manually:
+# define branch name / database name relations
+# in a post-checkout.ini file using statements like
+# branch_name = database_name
+# under a [databases] section
 # Checkout a branch and enjoy ^_^
 
-databases = {
-# -- BEGIN USER MODIFIABLE PART --
-'master': 'dolimaster',
-'develop': 'dolidev',
-# -- END USER MODIFIABLE PART --
-}
 
 import sys
 import os
@@ -40,6 +37,7 @@ import subprocess
 import re
 import time
 import shutil
+import configparser
 
 errorcode = 0
 
@@ -51,21 +49,27 @@ if sys.argv[3] == '1':
         fqbn = subprocess.check_output(['git', 'symbolic-ref',
 '--short', 'HEAD'])
     except:
+        print("Unable to detect new branch name")
         sys.exit()
 
     # Strip newline and convert to string
     fqbn = fqbn.rstrip().decode('utf-8')
+    print(fqbn)
 
-    # Search corresponding db name
-    if fqbn in databases:
-        newdb = databases[fqbn]
+    # Default is database name = branch name
+    newdb = fqbn
 
-    #  If not found, use branch name
-    else:
-        print("Warning: Database name unknown for this branch, keeping current database", file=sys.stderr)
-        newdb = fqbn
-        errorcode = 1
-        sys.exit(errorcode)
+    # Is there a configuration file ?
+    if os.path.exists('post-checkout.ini'):
+        config = configparser.ConfigParser()
+        config.read('post-checkout.ini')
+
+        # Search corresponding database name
+        if config.has_option('databases', fqbn):
+            newdb = config.get('databases', fqbn)
+
+    # Strip illegal mysql database name characters
+    newdb = re.sub(r'[^0-9a-zA-Z$_]', '', newdb)
 
     # Update configuration file
     confpath = os.path.abspath('htdocs/conf')
