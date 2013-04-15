@@ -1,0 +1,73 @@
+#!/bin/sh
+#
+# A checkout hook for Dolibarr that helps switching
+# configuration file according to current branch.
+# (C)2013 Raphaël Doursenaud <rdoursenaud@gpcsolutions.fr>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# --- Constants
+CONF_FILE="/htdocs/conf/conf.php"
+CONF_BAK="/.git/hooks/conf/"
+
+# --- Command line
+prev_head="$1"
+new_head="$2"
+chg_branch="$3"
+
+# --- Safety check
+if [ -z "$GIT_DIR" ]
+then
+        echo "Don't run this script from the command line." >&2
+        exit 1
+fi
+
+# --- Main processing
+echo "~ Dolibarr configuration switcher for GIT ~"
+if [ $chg_branch -eq 1 ]
+then
+	# --- Git infos
+	toplevel="$(git rev-parse --show-toplevel)"
+	prev_branch="$(git rev-parse --abbrev-ref @{-1})"
+	new_branch="$(git rev-parse --abbrev-ref HEAD)"
+
+	# Do nothing if we stayed on the same branch
+	if [ $prev_branch == $new_branch ]
+	then
+		echo "Stayed on the same branch, done nothing !"
+		exit 0
+	fi
+
+	# --- Creating backup directory
+	mkdir -p $toplevel$CONF_BAK
+
+	# --- Backing up
+	if [ -f $toplevel$CONF_FILE ]
+	then
+		echo "Backing up $toplevel$CONF_FILE to $toplevel$CONF_BAK$prev_branch"
+		mv $toplevel$CONF_FILE $toplevel$CONF_BAK$prev_branch
+	fi
+
+	# --- Restoring backup
+	if [ -f $toplevel$CONF_BAK$new_branch ]
+	then
+		echo "Restoring $toplevel$CONF_BAK$new_branch to $toplevel$CONF_FILE"
+		mv $toplevel$CONF_BAK$new_branch $toplevel$CONF_FILE
+	else
+		echo "No backup found, please create $toplevel$CONF_FILE manually"
+	fi
+fi
+
+exit 0
+
