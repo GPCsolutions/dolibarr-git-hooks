@@ -43,7 +43,7 @@ then
 	new_branch="$(git rev-parse --abbrev-ref HEAD)"
 
 	# Do nothing if we stayed on the same branch
-	if [ $prev_branch == $new_branch ]
+	if [ $prev_branch = $new_branch ]
 	then
 		echo "Stayed on the same branch, done nothing !"
 		exit 0
