@@ -2,7 +2,7 @@
 #
 # A checkout hook for Dolibarr that helps switching
 # configuration file according to current branch.
-# (C)2013 Raphaël Doursenaud <rdoursenaud@gpcsolutions.fr>
+# (C)2013-2015 Raphaël Doursenaud <rdoursenaud@gpcsolutions.fr>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ then
 	# Do nothing if we stayed on the same branch
 	if [ $prev_branch = $new_branch ]
 	then
-		echo "Stayed on the same branch, done nothing !"
+		echo "Stayed on the same branch. Nothing to do!"
 		exit 0
 	fi
 
@@ -65,7 +65,23 @@ then
 		echo "Restoring $toplevel$CONF_BAK$new_branch to $toplevel$CONF_FILE"
 		mv $toplevel$CONF_BAK$new_branch $toplevel$CONF_FILE
 	else
-		echo "No backup found, please create $toplevel$CONF_FILE manually"
+		echo "No backup found for this branch."
+
+		# Allows us to read user input below, assigns stdin to keyboard
+		exec < /dev/tty
+
+		while true; do
+			read -p "Do you want to keep the current configuration? (Y/n)" yn
+			if [ "$yn" = "" ]; then
+				yn='Y'
+			fi
+			case $yn in
+				[Yy]* ) cp $toplevel$CONF_BAK$prev_branch $toplevel$CONF_FILE; break;;
+				[Nn]* ) exit;;
+				* ) echo "Please answer yes or no.";;
+			esac
+		done
+
 	fi
 fi
 
