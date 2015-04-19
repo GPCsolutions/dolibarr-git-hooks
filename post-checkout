@@ -29,12 +29,11 @@ chg_branch="$3"
 # --- Safety check
 if [ -z "$GIT_DIR" ]
 then
-        echo "Don't run this script from the command line." >&2
-        exit 1
+	echo "Don't run this script from the command line." >&2
+	exit 1
 fi
 
 # --- Main processing
-echo "~ Dolibarr configuration switcher for GIT ~"
 if [ $chg_branch -eq 1 ]
 then
 	# --- Git infos
@@ -42,12 +41,20 @@ then
 	prev_branch="$(git rev-parse --abbrev-ref @{-1})"
 	new_branch="$(git rev-parse --abbrev-ref HEAD)"
 
+	# Do nothing when rebasing
+	if [ -z "$prev_branch" ]
+	then
+		exit 0
+	fi
+
 	# Do nothing if we stayed on the same branch
 	if [ $prev_branch = $new_branch ]
 	then
 		echo "Stayed on the same branch. Nothing to do!"
 		exit 0
 	fi
+
+	echo "~ Dolibarr configuration switcher for GIT ~"
 
 	# --- Creating backup directory
 	mkdir -p $toplevel$CONF_BAK
@@ -86,4 +93,3 @@ then
 fi
 
 exit 0
-
