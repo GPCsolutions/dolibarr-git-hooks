@@ -41,24 +41,32 @@ then
 	prev_branch="$(git rev-parse --abbrev-ref @{-1})"
 	new_branch="$(git rev-parse --abbrev-ref HEAD)"
 
-	# Do nothing when rebasing
-	if [ -z "$prev_branch" ] || [ "HEAD" = "$new_branch" ]
+        echo "~ Dolibarr configuration switcher for GIT ~"
+
+        # --- Creating backup directory
+        mkdir -p $toplevel$CONF_BAK
+
+	# --- Do nothing when previous branch is unknown
+	if [ -z "$prev_branch" ]
 	then
-		echo "Rebasing. Nothing to do!"
+		echo "Comming from unknown branch. Nothing to do!"
 		exit 0
 	fi
 
-	# Do nothing if we stayed on the same branch
+	# --- Make a simple configuration backup when rebasing
+	if [ "HEAD" = "$new_branch" ]
+	then
+		echo "Backing up $toplevel$CONF_FILE to $toplevel$CONF_BAK$prev_branch"
+		cp $toplevel$CONF_FILE $toplevel$CONF_BAK$prev_branch
+		exit 0
+	fi
+
+	# --- Do nothing if we stayed on the same branch
 	if [ $prev_branch = $new_branch ]
 	then
 		echo "Stayed on the same branch. Nothing to do!"
 		exit 0
 	fi
-
-	echo "~ Dolibarr configuration switcher for GIT ~"
-
-	# --- Creating backup directory
-	mkdir -p $toplevel$CONF_BAK
 
 	# --- Backing up
 	if [ -f $toplevel$CONF_FILE ]
