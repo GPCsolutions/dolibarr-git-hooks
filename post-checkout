@@ -42,8 +42,9 @@ then
 	new_branch="$(git rev-parse --abbrev-ref HEAD)"
 
 	# Do nothing when rebasing
-	if [ -z "$prev_branch" ]
+	if [ -z "$prev_branch" ] || [ "HEAD" = "$new_branch" ]
 	then
+		echo "Rebasing. Nothing to do!"
 		exit 0
 	fi
 
